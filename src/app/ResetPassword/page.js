@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api, API_ENDPOINTS } from "@/app/lib/api";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -130,5 +130,21 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
+            <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
