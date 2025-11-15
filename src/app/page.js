@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { api, API_ENDPOINTS } from "@/app/lib/api";
+import { API_ENDPOINTS } from "@/app/lib/api";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -37,10 +39,51 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // Gunakan api.post() helper yang sudah punya error handling
-      const data = await api.post(API_ENDPOINTS.LOGIN, { username, password });
+      // Gunakan fetch langsung dengan error handling yang lebih baik
+      const loginUrl = `${API_BASE_URL}${API_ENDPOINTS.LOGIN}`;
+      const response = await fetch(loginUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-      if (data && data.token) {
+      // Check content type sebelum parsing
+      const contentType = response.headers.get("content-type");
+      
+      // Clone response untuk bisa dibaca beberapa kali
+      const responseClone = response.clone();
+
+      // Jika response bukan JSON, handle sebagai error
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await responseClone.text();
+        if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
+          setError(
+            "Server mengembalikan halaman error. Pastikan server backend berjalan dan endpoint tersedia."
+          );
+          console.error("HTML Response:", text.substring(0, 200));
+          return;
+        }
+        setError(`Server error: ${response.status}. Response: ${text.substring(0, 100)}`);
+        return;
+      }
+
+      // Parse JSON response
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        const text = await responseClone.text();
+        console.error("JSON parse error:", jsonError);
+        console.error("Response text:", text.substring(0, 500));
+        setError("Invalid response from server. Please check server logs.");
+        return;
+      }
+
+      // Handle response
+      if (response.ok && data.token) {
         // Simpan data ke localStorage (simpan di kedua tempat untuk kompatibilitas)
         localStorage.setItem("token", data.token);
         localStorage.setItem("auth_token", data.token);
@@ -74,7 +117,6 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error("Login error:", err);
-      // Handle error message yang lebih informatif
       if (err.message) {
         setError(err.message);
       } else {
