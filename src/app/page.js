@@ -6,10 +6,16 @@ import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/lib/api";
 
 // API URL must be set via environment variable
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+// Fallback to production URL if not set (for safety)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nacshier.my.id";
 
-if (!API_BASE_URL) {
-  console.error("❌ NEXT_PUBLIC_API_URL is not set!");
+if (!process.env.NEXT_PUBLIC_API_URL) {
+  console.warn("⚠️ NEXT_PUBLIC_API_URL not set, using fallback:", API_BASE_URL);
+}
+
+// Debug: Log API URL in development
+if (process.env.NODE_ENV === 'development') {
+  console.log("🔍 API_BASE_URL:", API_BASE_URL);
 }
 
 export default function LoginPage() {
@@ -44,12 +50,9 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // Validasi API_BASE_URL
-      if (!API_BASE_URL) {
-        setError("⚠️ API URL tidak dikonfigurasi! Silakan set NEXT_PUBLIC_API_URL di Vercel Environment Variables dan redeploy.");
-        setIsLoading(false);
-        return;
-      }
+      // Debug: Log API URL before request
+      console.log("🔍 API_BASE_URL:", API_BASE_URL);
+      console.log("🔍 Login URL:", `${API_BASE_URL}${API_ENDPOINTS.LOGIN}`);
       
       // Gunakan fetch langsung dengan error handling yang lebih baik
       const loginUrl = `${API_BASE_URL}${API_ENDPOINTS.LOGIN}`;
