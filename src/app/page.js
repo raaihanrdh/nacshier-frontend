@@ -44,6 +44,13 @@ export default function LoginPage() {
     setError("");
 
     try {
+      // Validasi API_BASE_URL
+      if (!API_BASE_URL) {
+        setError("⚠️ API URL tidak dikonfigurasi! Silakan set NEXT_PUBLIC_API_URL di Vercel Environment Variables dan redeploy.");
+        setIsLoading(false);
+        return;
+      }
+      
       // Gunakan fetch langsung dengan error handling yang lebih baik
       const loginUrl = `${API_BASE_URL}${API_ENDPOINTS.LOGIN}`;
       const response = await fetch(loginUrl, {
