@@ -458,10 +458,15 @@ const LaporanTransaksi = () => {
       }
 
       // Download file from backend
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      
+      if (!apiUrl) {
+        toast.error("API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL");
+        return;
+      }
+      
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${
-          API_ENDPOINTS.TRANSACTIONS_EXPORT_EXCEL
-        }?${params.toString()}`,
+        `${apiUrl}${API_ENDPOINTS.TRANSACTIONS_EXPORT_EXCEL}?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -549,10 +554,15 @@ const LaporanTransaksi = () => {
       }
 
       // Download file from backend
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      
+      if (!apiUrl) {
+        toast.error("API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL");
+        return;
+      }
+      
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${
-          API_ENDPOINTS.TRANSACTIONS_EXPORT_PDF
-        }?${params.toString()}`,
+        `${apiUrl}${API_ENDPOINTS.TRANSACTIONS_EXPORT_PDF}?${params.toString()}`,
         {
           method: "GET",
           headers: {

@@ -5,7 +5,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/lib/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// API URL must be set via environment variable
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_BASE_URL) {
+  console.error("❌ NEXT_PUBLIC_API_URL is not set!");
+}
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");

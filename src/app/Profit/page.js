@@ -166,7 +166,14 @@ const ProfitDashboard = () => {
       }
 
       // Download file from backend
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        toast.error(
+          "API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL"
+        );
+        return;
+      }
       const response = await fetch(
         `${apiUrl}${API_ENDPOINTS.PROFIT_EXPORT_PDF}?${params.toString()}`,
         {
@@ -240,7 +247,14 @@ const ProfitDashboard = () => {
       }
 
       // Download file from backend
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        toast.error(
+          "API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL"
+        );
+        return;
+      }
       const response = await fetch(
         `${apiUrl}${API_ENDPOINTS.PROFIT_EXPORT_EXCEL}?${params.toString()}`,
         {

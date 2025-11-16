@@ -1,12 +1,25 @@
 // lib/api.js - Centralized API helper with authentication
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// API URL must be set via environment variable NEXT_PUBLIC_API_URL
+// For production: Set in Vercel Environment Variables
+// For local dev: Create .env.local with NEXT_PUBLIC_API_URL=http://localhost:8000
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_BASE_URL) {
+  console.error(
+    "❌ NEXT_PUBLIC_API_URL is not set! Please configure it in environment variables."
+  );
+}
 
 /**
  * Get image URL from storage path
  */
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return "";
+  if (!API_BASE_URL) {
+    console.error("API URL tidak dikonfigurasi. Cannot generate image URL.");
+    return "";
+  }
   return `${API_BASE_URL}/storage/${imagePath}`;
 };
 
@@ -86,6 +99,12 @@ export const removeAuthToken = () => {
  * Fetch with authentication
  */
 export const fetchWithAuth = async (endpoint, options = {}) => {
+  if (!API_BASE_URL) {
+    throw new Error(
+      "API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL di environment variables."
+    );
+  }
+
   const token = getAuthToken();
 
   const headers = {
@@ -358,6 +377,12 @@ export const api = {
 
   // POST with FormData (for file uploads)
   postFormData: async (endpoint, formData, method = "POST") => {
+    if (!API_BASE_URL) {
+      throw new Error(
+        "API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL di environment variables."
+      );
+    }
+
     const token = getAuthToken();
     const headers = {
       Accept: "application/json",
