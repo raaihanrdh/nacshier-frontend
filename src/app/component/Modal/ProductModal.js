@@ -37,7 +37,8 @@ export default function ProductModal({
         category_id: product.category_id || "",
         image_file: null,
         image_preview:
-          product.image_url ||
+          product.image_url || 
+          product.image_data || // Base64 data from database
           (product.image_path ? getImageUrl(product.image_path) : null),
       });
     } else {
@@ -70,9 +71,11 @@ export default function ProductModal({
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file size (max 2MB sesuai controller)
-      if (file.size > 2048 * 1024) {
+      // Validate file size (max 2MB = 2097152 bytes)
+      const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+      if (file.size > maxSize) {
         toast.error("Ukuran gambar maksimal 2MB");
+        e.target.value = ""; // Clear file input
         return;
       }
 
@@ -85,14 +88,25 @@ export default function ProductModal({
       ];
       if (!allowedTypes.includes(file.type)) {
         toast.error("Format gambar harus JPEG, PNG, JPG, atau GIF");
+        e.target.value = ""; // Clear file input
         return;
       }
 
-      setFormData((prev) => ({
-        ...prev,
-        image_file: file,
-        image_preview: URL.createObjectURL(file),
-      }));
+      // Convert file to base64 data URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result; // data:image/jpeg;base64,...
+        setFormData((prev) => ({
+          ...prev,
+          image_file: base64String, // Store base64 string instead of File object
+          image_preview: base64String, // Use base64 directly for preview
+        }));
+      };
+      reader.onerror = () => {
+        toast.error("Gagal membaca file gambar");
+        e.target.value = ""; // Clear file input
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -133,8 +147,8 @@ export default function ProductModal({
     setLoading(true);
 
     try {
-      // Siapkan data dasar
-      const baseData = {
+      // Siapkan data dengan base64 image
+      const requestData = {
         name: formData.name.trim(),
         selling_price: formData.selling_price,
         capital_price: formData.capital_price,
@@ -143,44 +157,21 @@ export default function ProductModal({
         category_id: formData.category_id,
       };
 
+      // Tambahkan base64 image jika ada
+      if (formData.image_file) {
+        requestData.image = formData.image_file; // Base64 data URL string
+      }
+
       let responseData;
 
       if (product) {
-        // Mode update
+        // Mode update - kirim sebagai JSON (bukan FormData)
         const url = `${API_ENDPOINTS.PRODUCTS}/${product.product_id}`;
-
-        if (formData.image_file) {
-          // Jika ada file gambar, gunakan FormData dengan postFormData
-          const formDataToSend = new FormData();
-          Object.keys(baseData).forEach((key) => {
-            formDataToSend.append(key, baseData[key]);
-          });
-          formDataToSend.append("image", formData.image_file);
-
-          // Gunakan postFormData untuk upload file dengan method PUT
-          responseData = await api.postFormData(url, formDataToSend, "PUT");
-        } else {
-          // Jika tidak ada file gambar, gunakan PUT biasa
-          responseData = await api.put(url, baseData);
-        }
+        responseData = await api.put(url, requestData);
       } else {
-        // Mode create
+        // Mode create - kirim sebagai JSON (bukan FormData)
         const url = API_ENDPOINTS.PRODUCTS;
-
-        if (formData.image_file) {
-          // Dengan file gambar, gunakan FormData
-          const formDataToSend = new FormData();
-          Object.keys(baseData).forEach((key) => {
-            formDataToSend.append(key, baseData[key]);
-          });
-          formDataToSend.append("image", formData.image_file);
-
-          // Gunakan postFormData untuk upload file
-          responseData = await api.postFormData(url, formDataToSend);
-        } else {
-          // Tanpa file gambar, gunakan POST biasa
-          responseData = await api.post(url, baseData);
-        }
+        responseData = await api.post(url, requestData);
       }
 
       // Handle response format (bisa langsung data atau wrapped dalam success)

@@ -158,14 +158,16 @@ export default function ProductGrid() {
     return category ? category.name : "Unknown";
   };
 
-  // Function to get image URL - using image_url from controller if available
+  // Function to get image URL - using base64 image_data from database
   const getProductImageUrl = (product) => {
-    // Priority: image_url > image_path > null
+    // Priority: image_url (base64) > image_data (base64) > image_path (legacy) > null
     if (product.image_url) {
-      return product.image_url;
+      return product.image_url; // Base64 data URL from controller
+    } else if (product.image_data) {
+      return product.image_data; // Base64 data directly from database
     } else if (product.image_path) {
       const url = getImageUrl(product.image_path);
-      return url || null;
+      return url || null; // Legacy path support
     }
     return null;
   };

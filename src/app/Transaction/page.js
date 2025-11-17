@@ -440,14 +440,15 @@ const Transaction = () => {
                 onClick={() => product.stock > 0 && addToCart(product)}
               >
                 <div className="relative w-full h-40 sm:h-36 overflow-hidden bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 flex items-center justify-center">
-                  {product.image_url || product.image_path ? (
+                  {product.image_url || product.image_data || product.image_path ? (
                     <>
                       <img
                         src={
-                          product.image_url ||
+                          product.image_url || // Base64 data URL from controller
+                          product.image_data || // Base64 data directly from database
                           (product.image_path
                             ? getImageUrl(product.image_path)
-                            : null)
+                            : null) // Legacy path support
                         }
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
