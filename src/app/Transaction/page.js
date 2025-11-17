@@ -205,16 +205,25 @@ const Transaction = () => {
   }, [query, selectedCategory, sortOrder, products, categories]);
 
   const addToCart = (product) => {
-    if (product.stock <= 0) return;
+    if (product.stock <= 0) {
+      toast.warning(`Stok ${product.name} habis!`);
+      return;
+    }
 
     setCartItems((prevItems) => {
       const existing = prevItems.find(
         (item) => item.product_id === product.product_id
       );
       if (existing) {
+        // Cek stock saat menambah quantity
+        const newQuantity = existing.quantity + 1;
+        if (newQuantity > product.stock) {
+          toast.warning(`Stok ${product.name} tidak mencukupi! Stok tersedia: ${product.stock}`);
+          return prevItems; // Tidak update jika stock tidak mencukupi
+        }
         return prevItems.map((item) =>
           item.product_id === product.product_id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: newQuantity }
             : item
         );
       } else {
@@ -230,13 +239,23 @@ const Transaction = () => {
   };
 
   const increaseQuantity = (productId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product_id === productId
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    );
+    setCartItems((prevItems) => {
+      const item = prevItems.find((i) => i.product_id === productId);
+      if (!item) return prevItems;
+      
+      // Cek stock sebelum menambah quantity
+      const newQuantity = item.quantity + 1;
+      if (newQuantity > item.stock) {
+        toast.warning(`Stok ${item.name} tidak mencukupi! Stok tersedia: ${item.stock}`);
+        return prevItems; // Tidak update jika stock tidak mencukupi
+      }
+      
+      return prevItems.map((i) =>
+        i.product_id === productId
+          ? { ...i, quantity: newQuantity }
+          : i
+      );
+    });
   };
 
   const decreaseQuantity = (productId) => {
@@ -287,6 +306,21 @@ const Transaction = () => {
     if (!currentShiftId) {
       toast.error("Shift tidak ditemukan. Silakan login ulang.");
       return;
+    }
+
+    // Validasi stock sebelum checkout
+    for (const item of cartItems) {
+      const product = products.find((p) => p.product_id === item.product_id);
+      if (!product) {
+        toast.error(`Produk ${item.name} tidak ditemukan!`);
+        return;
+      }
+      if (product.stock < item.quantity) {
+        toast.error(
+          `Stok ${item.name} tidak mencukupi! Stok tersedia: ${product.stock}, dibutuhkan: ${item.quantity}`
+        );
+        return;
+      }
     }
 
     const transactionData = {
@@ -440,7 +474,9 @@ const Transaction = () => {
                 onClick={() => product.stock > 0 && addToCart(product)}
               >
                 <div className="relative w-full h-40 sm:h-36 overflow-hidden bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 flex items-center justify-center">
-                  {product.image_url || product.image_data || product.image_path ? (
+                  {product.image_url ||
+                  product.image_data ||
+                  product.image_path ? (
                     <>
                       <img
                         src={
