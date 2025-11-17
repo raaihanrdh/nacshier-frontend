@@ -252,10 +252,24 @@ const Transaction = () => {
   };
 
   const removeFromCart = (productId) => {
-    setCartItems((prevItems) =>
-      prevItems.filter((item) => item.product_id !== productId)
-    );
+    setCartItems((prevItems) => {
+      const newItems = prevItems.filter(
+        (item) => item.product_id !== productId
+      );
+      // Auto-close cart jika kosong
+      if (newItems.length === 0) {
+        setShowCart(false);
+      }
+      return newItems;
+    });
   };
+
+  // Auto-close cart saat kosong
+  useEffect(() => {
+    if (cartItems.length === 0 && showCart) {
+      setShowCart(false);
+    }
+  }, [cartItems.length, showCart]);
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.selling_price * item.quantity,
@@ -425,25 +439,42 @@ const Transaction = () => {
                 }`}
                 onClick={() => product.stock > 0 && addToCart(product)}
               >
-                <div
-                  className={`relative w-full h-40 sm:h-36 ${
-                    product.image_path
-                      ? "overflow-hidden"
-                      : "bg-gradient-to-br from-gray-500 to-blue-900 flex items-center justify-center"
-                  }`}
-                >
-                  {product.image_path ? (
-                    <img
-                      src={getImageUrl(product.image_path)}
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = "https://via.placeholder.com/150";
-                      }}
-                    />
+                <div className="relative w-full h-40 sm:h-36 overflow-hidden bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 flex items-center justify-center">
+                  {product.image_url || product.image_path ? (
+                    <>
+                      <img
+                        src={
+                          product.image_url ||
+                          (product.image_path
+                            ? getImageUrl(product.image_path)
+                            : null)
+                        }
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        onError={(e) => {
+                          // Hide image on error and show placeholder
+                          e.target.style.display = "none";
+                          const placeholder =
+                            e.target.parentElement.querySelector(
+                              ".image-placeholder"
+                            );
+                          if (placeholder) {
+                            placeholder.style.display = "flex";
+                          }
+                        }}
+                      />
+                      {/* Placeholder that shows on error */}
+                      <div
+                        className="image-placeholder absolute inset-0 items-center justify-center bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800"
+                        style={{ display: "none" }}
+                      >
+                        <div className="text-2xl sm:text-3xl text-white font-bold opacity-80">
+                          {product.name.slice(0, 2).toUpperCase()}
+                        </div>
+                      </div>
+                    </>
                   ) : (
-                    <div className="text-2xl sm:text-3xl text-white font-bold">
+                    <div className="text-2xl sm:text-3xl text-white font-bold opacity-90">
                       {product.name.slice(0, 2).toUpperCase()}
                     </div>
                   )}
@@ -467,7 +498,7 @@ const Transaction = () => {
                   <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-200 line-clamp-2 mb-2 min-h-[2.5rem]">
                     {product.name}
                   </h3>
-                  
+
                   {/* Price with highlight background */}
                   <div className="bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-900/30 rounded-lg p-2.5 mb-2 border border-green-100 dark:border-green-800/50">
                     <p className="text-green-600 dark:text-green-400 font-bold text-base sm:text-lg leading-tight">
@@ -477,21 +508,25 @@ const Transaction = () => {
 
                   {/* Stock and Category Row */}
                   <div className="flex items-center justify-between gap-2">
-                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg ${
-                      product.stock <= 0 
-                        ? 'bg-red-100 dark:bg-red-900/30' 
-                        : product.stock <= 5 
-                        ? 'bg-orange-100 dark:bg-orange-900/30' 
-                        : 'bg-gray-100 dark:bg-gray-700'
-                    }`}>
-                      <span className={`text-xs font-semibold ${
-                        product.stock <= 0 
-                          ? 'text-red-700 dark:text-red-300' 
-                          : product.stock <= 5 
-                          ? 'text-orange-700 dark:text-orange-300' 
-                          : 'text-gray-700 dark:text-gray-300'
-                      }`}>
-                        {product.stock <= 0 ? 'HABIS' : `${product.stock} stok`}
+                    <div
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg ${
+                        product.stock <= 0
+                          ? "bg-red-100 dark:bg-red-900/30"
+                          : product.stock <= 5
+                          ? "bg-orange-100 dark:bg-orange-900/30"
+                          : "bg-gray-100 dark:bg-gray-700"
+                      }`}
+                    >
+                      <span
+                        className={`text-xs font-semibold ${
+                          product.stock <= 0
+                            ? "text-red-700 dark:text-red-300"
+                            : product.stock <= 5
+                            ? "text-orange-700 dark:text-orange-300"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}
+                      >
+                        {product.stock <= 0 ? "HABIS" : `${product.stock} stok`}
                       </span>
                     </div>
                     <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded-full truncate max-w-[50%]">
@@ -522,31 +557,16 @@ const Transaction = () => {
         </div>
       </div>
 
-      {/* Cart Button - Mobile Optimized */}
-      {cartItems.length > 0 ? (
-        <button
-          onClick={() => setShowCart(!showCart)}
-          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-auto z-50 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-xl shadow-2xl transition-all duration-200 flex items-center justify-center gap-3 px-6 py-4 sm:py-4 sm:rounded-full sm:px-4 font-semibold text-base sm:text-sm"
-        >
-          <Shopping size={24} className="sm:w-6 sm:h-6" />
-          <span className="sm:hidden">
-            Keranjang ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})
-          </span>
-          <span className="hidden sm:inline absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
-            {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-          </span>
-          <span className="sm:hidden font-bold">
-            Rp {formatNumber(total)}
-          </span>
-        </button>
-      ) : (
-        <button
-          onClick={() => setShowCart(!showCart)}
-          className="fixed bottom-6 right-6 z-50 p-4 sm:p-4 bg-blue-600 text-white rounded-full shadow-2xl hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all duration-200 flex items-center justify-center"
-        >
-          <Shopping size={24} className="sm:w-6 sm:h-6" />
-        </button>
-      )}
+      {/* Cart Button - Tetap Bentuk Sama dengan Badge Notifikasi Bulat */}
+      <button
+        onClick={() => setShowCart(!showCart)}
+        className="fixed bottom-6 right-6 z-50 p-4 sm:p-4 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-full shadow-2xl transition-all duration-200 flex items-center justify-center w-14 h-14 sm:w-14 sm:h-14"
+      >
+        <Shopping size={24} className="sm:w-6 sm:h-6" />
+        {cartItems.length > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-800 animate-bounce-notification"></span>
+        )}
+      </button>
 
       {/* Cart Sidebar - Mobile Optimized */}
       {showCart && (
@@ -562,7 +582,8 @@ const Transaction = () => {
                 Keranjang
                 {cartItems.length > 0 && (
                   <span className="bg-white/20 text-white text-sm px-2 py-1 rounded-full">
-                    {cartItems.reduce((sum, item) => sum + item.quantity, 0)} item
+                    {cartItems.reduce((sum, item) => sum + item.quantity, 0)}{" "}
+                    item
                   </span>
                 )}
               </h2>
@@ -599,7 +620,8 @@ const Transaction = () => {
                             @ Rp {formatNumber(item.selling_price)}
                           </p>
                           <p className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
-                            Rp {formatNumber(item.selling_price * item.quantity)}
+                            Rp{" "}
+                            {formatNumber(item.selling_price * item.quantity)}
                           </p>
                         </div>
 
@@ -650,15 +672,17 @@ const Transaction = () => {
 
             {/* Cart Footer - Sticky */}
             {cartItems.length > 0 && (
-              <div className="p-4 sm:p-5 border-t-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
+              <div className="p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg sticky bottom-0 z-10">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-300">Total</span>
+                  <span className="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-300">
+                    Total
+                  </span>
                   <span className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
                     Rp {formatNumber(total)}
                   </span>
                 </div>
 
-                <div className="mb-4">
+                <div className="mb-4 z-20 relative">
                   <Dropdown
                     label="Metode Pembayaran"
                     value={paymentMethod}
@@ -670,17 +694,18 @@ const Transaction = () => {
                       { value: "Qris", label: "QRIS" },
                       { value: "Transfer", label: "Transfer" },
                     ]}
-                    className="w-full"
+                    className="w-full z-30"
+                    placement="top"
                   />
                 </div>
 
                 <button
                   onClick={handleCheckout}
                   disabled={cartItems.length === 0}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white py-4 sm:py-4 rounded-xl disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all font-bold text-base sm:text-lg flex items-center justify-center gap-2 shadow-lg active:scale-95 min-h-[52px]"
+                  className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700 text-white py-4 sm:py-4 rounded-xl disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all font-bold text-base sm:text-lg flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-95 min-h-[52px] z-20 relative"
                 >
                   <Shopping size={24} className="sm:w-6 sm:h-6" />
-                  Bayar Sekarang
+                  Selesaikan Transaksi
                 </button>
               </div>
             )}
@@ -699,6 +724,18 @@ const Transaction = () => {
         }
         .animate-slide-in-right {
           animation: slide-in-right 0.3s ease-out;
+        }
+        @keyframes bounce-notification {
+          0%,
+          100% {
+            transform: translateY(0) scale(1);
+          }
+          50% {
+            transform: translateY(-4px) scale(1.1);
+          }
+        }
+        .animate-bounce-notification {
+          animation: bounce-notification 0.8s ease-in-out infinite;
         }
       `}</style>
     </div>

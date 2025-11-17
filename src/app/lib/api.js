@@ -3,25 +3,41 @@
 // API URL must be set via environment variable NEXT_PUBLIC_API_URL
 // For production: Set in Vercel Environment Variables
 // For local dev: Create .env.local with NEXT_PUBLIC_API_URL=http://localhost:8000
-// Fallback to production URL if not set (for safety)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nacshier.my.id";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-if (!process.env.NEXT_PUBLIC_API_URL) {
-  console.warn(
-    "⚠️ NEXT_PUBLIC_API_URL not set, using fallback:", API_BASE_URL
+if (!API_BASE_URL) {
+  console.error(
+    "❌ NEXT_PUBLIC_API_URL is not set! Please configure it in environment variables."
   );
 }
 
 /**
  * Get image URL from storage path
+ * Backend sudah return image_url dengan asset(), jadi kita hanya perlu handle image_path jika image_url tidak ada
  */
 export const getImageUrl = (imagePath) => {
-  if (!imagePath) return "";
+  if (!imagePath) return null;
   if (!API_BASE_URL) {
     console.error("API URL tidak dikonfigurasi. Cannot generate image URL.");
-    return "";
+    return null;
   }
-  return `${API_BASE_URL}/storage/${imagePath}`;
+  
+  // Jika path sudah full URL, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // Remove leading slash if exists to avoid double slash
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+  
+  // Backend store() return path seperti "products/filename.png" tanpa prefix "storage/"
+  // Jadi kita perlu tambahkan "storage/" jika belum ada
+  const finalPath = cleanPath.startsWith('storage/') ? cleanPath : `storage/${cleanPath}`;
+  
+  // Pastikan API_BASE_URL tidak ada trailing slash
+  const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  
+  return `${baseUrl}/${finalPath}`;
 };
 
 /**
@@ -457,7 +473,7 @@ export const auth = {
     } finally {
       removeAuthToken();
       if (typeof window !== "undefined") {
-        window.location.href = "/login";
+        window.location.href = "/";
       }
     }
   },

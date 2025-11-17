@@ -30,6 +30,7 @@ import {
 } from "@icon-park/react";
 import { AlertCircle } from "react-feather";
 import { api, API_ENDPOINTS, formatNumber } from "@/app/lib/api";
+import Dropdown from "../component/Dropdown";
 
 // Register ChartJS components
 ChartJS.register(
@@ -54,12 +55,23 @@ const Dashboard = () => {
   const [topProducts, setTopProducts] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [salesChartData, setSalesChartData] = useState([]);
+  const [period, setPeriod] = useState("harian"); // harian, mingguan, bulanan
 
   useEffect(() => {
     // Fetch dashboard summary data
     const fetchDashboardSummary = async () => {
       try {
-        const data = await api.get(API_ENDPOINTS.DASHBOARD_SUMMARY);
+        // Build params based on period
+        const params = { period };
+        if (period === "harian") {
+          params.period = "daily";
+        } else if (period === "mingguan") {
+          params.period = "weekly";
+        } else if (period === "bulanan") {
+          params.period = "monthly";
+        }
+
+        const data = await api.get(API_ENDPOINTS.DASHBOARD_SUMMARY, params);
         setDashboardData(data);
       } catch (error) {
         console.error("Error fetching dashboard summary:", error);
@@ -117,7 +129,7 @@ const Dashboard = () => {
     fetchTopProducts();
     fetchSalesChart();
     fetchLowStockProducts();
-  }, []);
+  }, [period]);
 
   const chartData = {
     labels: salesChartData.map((entry) => entry.date),
@@ -161,21 +173,38 @@ const Dashboard = () => {
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="p-1.5 sm:p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-              <ChartLineArea
-                theme="filled"
-                size={20}
-                className="sm:w-6 sm:h-6 text-indigo-600 dark:text-indigo-400"
-              />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                <ChartLineArea
+                  theme="filled"
+                  size={20}
+                  className="sm:w-6 sm:h-6 text-indigo-600 dark:text-indigo-400"
+                />
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-gray-500">
+                  Dashboard
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                  Ringkasan aktivitas dan performa bisnis
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-gray-500">
-                Dashboard
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                Ringkasan aktivitas dan performa bisnis
-              </p>
+            <div className="w-full sm:w-auto sm:min-w-[200px]">
+              <Dropdown
+                label="Filter Periode"
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+                placeholder="Pilih periode"
+                themeColor="indigo"
+                options={[
+                  { value: "harian", label: "Harian" },
+                  { value: "mingguan", label: "Mingguan" },
+                  { value: "bulanan", label: "Bulanan" },
+                ]}
+                className="w-full"
+              />
             </div>
           </div>
         </div>

@@ -160,10 +160,12 @@ export default function ProductGrid() {
 
   // Function to get image URL - using image_url from controller if available
   const getProductImageUrl = (product) => {
+    // Priority: image_url > image_path > null
     if (product.image_url) {
       return product.image_url;
     } else if (product.image_path) {
-      return getImageUrl(product.image_path);
+      const url = getImageUrl(product.image_path);
+      return url || null;
     }
     return null;
   };
@@ -301,13 +303,7 @@ export default function ProductGrid() {
                   className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-none border-2 border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 hover:shadow-xl dark:hover:shadow-none transition-all duration-300 overflow-hidden cursor-pointer group active:scale-[0.98]"
                 >
                   {/* Product Image */}
-                  <div
-                    className={`relative w-full h-40 sm:h-36 overflow-hidden ${
-                      getProductImageUrl(product)
-                        ? ""
-                        : "bg-gradient-to-br from-gray-500 to-blue-900 flex items-center justify-center"
-                    }`}
-                  >
+                  <div className="relative w-full h-40 sm:h-36 overflow-hidden bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800 flex items-center justify-center">
                     {getProductImageUrl(product) ? (
                       <>
                         <img
@@ -315,23 +311,33 @@ export default function ProductGrid() {
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://via.placeholder.com/150";
+                            // Hide image on error and show placeholder
+                            e.target.style.display = 'none';
+                            const placeholder = e.target.parentElement.querySelector('.image-placeholder');
+                            if (placeholder) {
+                              placeholder.style.display = 'flex';
+                            }
                           }}
                         />
+                        {/* Placeholder that shows on error */}
+                        <div className="image-placeholder absolute inset-0 items-center justify-center bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 dark:from-gray-600 dark:via-gray-700 dark:to-gray-800" style={{ display: 'none' }}>
+                          <div className="text-3xl sm:text-4xl text-white font-bold opacity-80">
+                            {product.name.slice(0, 2).toUpperCase()}
+                          </div>
+                        </div>
                         {/* Remove image button */}
                         <button
                           onClick={(e) =>
                             handleRemoveImage(product.product_id, e)
                           }
-                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 hover:opacity-100 transition-opacity duration-200"
+                          className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg z-10"
                           title="Hapus gambar"
                         >
                           <DeleteFive size={14} />
                         </button>
                       </>
                     ) : (
-                      <div className="text-3xl text-white font-bold">
+                      <div className="text-3xl sm:text-4xl text-white font-bold opacity-90">
                         {product.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}

@@ -510,11 +510,11 @@ export default function Cashflow() {
                 />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-gray-500">
-                  Arus Kas (Cashflow)
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
+                  Laporan Arus Kas
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Kelola pemasukan dan pengeluaran kas
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                  Cashflow Report
                 </p>
               </div>
             </div>
@@ -532,95 +532,114 @@ export default function Cashflow() {
 
       {/* Body */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-        {/* Kartu Ringkasan */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 lg:p-5 border-2 border-gray-200 dark:border-gray-700 shadow-md dark:shadow-none">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
+        {/* Ringkasan Arus Kas - Attractive & Professional */}
+        <div className="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-xl shadow-lg dark:shadow-xl mb-6 border border-gray-200 dark:border-gray-700">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-5 pb-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+            <ChartLineArea
+              theme="filled"
+              size={20}
+              className="text-emerald-600 dark:text-emerald-400"
+            />
+            Ringkasan Arus Kas
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-green-200 dark:border-green-700/50">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs sm:text-sm font-semibold text-green-700 dark:text-green-300">
                   Pemasukan
                 </p>
-                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-500 truncate">
-                  {formatCurrency(totals.income)}
-                </p>
-              </div>
-              <div className="p-1.5 sm:p-2 bg-green-100 dark:bg-green-900/30 rounded-lg flex-shrink-0 self-start sm:self-auto">
+                <div className="p-2 bg-white dark:bg-green-900/30 rounded-lg shadow-sm">
                 <IncomeOne
                   theme="filled"
-                  size={16}
-                  className="sm:w-5 sm:h-5 text-green-600 dark:text-green-400"
+                    size={18}
+                  className="text-green-600 dark:text-green-400"
                 />
               </div>
             </div>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-900 dark:text-green-100">
+                {formatCurrency(totals.income)}
+              </p>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-medium">Total Income</p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 lg:p-5 border-2 border-gray-200 dark:border-gray-700 shadow-md dark:shadow-none">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
+            <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-red-200 dark:border-red-700/50">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300">
                   Pengeluaran
                 </p>
-                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-500 truncate">
-                  {formatCurrency(totals.expense)}
-                </p>
-              </div>
-              <div className="p-1.5 sm:p-2 bg-red-100 dark:bg-red-900/30 rounded-lg flex-shrink-0 self-start sm:self-auto">
+                <div className="p-2 bg-white dark:bg-red-900/30 rounded-lg shadow-sm">
                 <ShoppingBag
                   theme="filled"
-                  size={16}
-                  className="sm:w-5 sm:h-5 text-red-600 dark:text-red-400"
+                    size={18}
+                  className="text-red-600 dark:text-red-400"
                 />
               </div>
             </div>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-900 dark:text-red-100">
+                {formatCurrency(totals.expense)}
+              </p>
+              <p className="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">Total Expense</p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 lg:p-5 border-2 border-gray-200 dark:border-gray-700 shadow-md dark:shadow-none">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
-                  Saldo
-                </p>
-                <p
-                  className={`text-sm sm:text-base lg:text-lg font-semibold truncate ${
+            <div className={`bg-gradient-to-br p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border ${
                     balance >= 0
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {formatCurrency(balance)}
-                </p>
-              </div>
-              <div
-                className={`p-1.5 sm:p-2 rounded-lg flex-shrink-0 self-start sm:self-auto ${
+                ? "from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700/50"
+                : "from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700/50"
+            }`}>
+              <div className="flex items-center justify-between mb-3">
+                <p className={`text-xs sm:text-sm font-semibold ${
                   balance >= 0
-                    ? "bg-blue-100 dark:bg-blue-900/30"
-                    : "bg-orange-100 dark:bg-orange-900/30"
-                }`}
-              >
+                    ? "text-blue-700 dark:text-blue-300"
+                    : "text-orange-700 dark:text-orange-300"
+                }`}>
+                  Net Cashflow
+                </p>
+                <div className={`p-2 rounded-lg shadow-sm ${
+                  balance >= 0
+                    ? "bg-white dark:bg-blue-900/30"
+                    : "bg-white dark:bg-orange-900/30"
+                }`}>
                 <BalanceOne
                   theme="filled"
-                  size={16}
-                  className={`sm:w-5 sm:h-5 ${
+                    size={18}
+                  className={
                     balance >= 0
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-orange-600 dark:text-orange-400"
-                  }`}
+                  }
                 />
               </div>
+              </div>
+              <p
+                className={`text-xl sm:text-2xl lg:text-3xl font-bold ${
+                  balance >= 0
+                    ? "text-blue-900 dark:text-blue-100"
+                    : "text-orange-900 dark:text-orange-100"
+                }`}
+              >
+                {formatCurrency(balance)}
+              </p>
+              <p className={`text-xs mt-2 font-medium ${
+                balance >= 0
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-orange-600 dark:text-orange-400"
+              }`}>Balance</p>
             </div>
           </div>
         </div>
 
-        {/* Kontrol Filter */}
-        <div className="bg-white dark:bg-gray-800/50 p-3 sm:p-5 rounded-lg border border-gray-200 dark:border-gray-700/50 mb-4 sm:mb-6 shadow-sm dark:shadow-none">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
-            <div className="flex items-center gap-2">
+        {/* Kontrol Filter - Attractive & Professional */}
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg dark:shadow-xl mb-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-5 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
               <Filter
                 theme="filled"
                 size={18}
-                className="text-gray-600 dark:text-gray-300"
+                  className="text-emerald-600 dark:text-emerald-400"
               />
-              <h2 className="text-base font-semibold text-gray-900 dark:text-gray-500">
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
                 Filter
               </h2>
             </div>
@@ -712,8 +731,8 @@ export default function Cashflow() {
             {/* Category Select */}
             <Dropdown
               label="Kategori"
-              value={filters.category}
-              onChange={(e) => handleFilterChange("category", e.target.value)}
+                value={filters.category}
+                onChange={(e) => handleFilterChange("category", e.target.value)}
               placeholder="Semua Kategori"
               themeColor="emerald"
               optgroups={[
@@ -739,8 +758,8 @@ export default function Cashflow() {
             {/* Type & Method */}
             <Dropdown
               label="Tipe"
-              value={filters.type}
-              onChange={(e) => handleFilterChange("type", e.target.value)}
+                  value={filters.type}
+                  onChange={(e) => handleFilterChange("type", e.target.value)}
               placeholder="Semua"
               themeColor="emerald"
               options={[
@@ -752,8 +771,8 @@ export default function Cashflow() {
 
             <Dropdown
               label="Metode"
-              value={filters.method}
-              onChange={(e) => handleFilterChange("method", e.target.value)}
+                  value={filters.method}
+                  onChange={(e) => handleFilterChange("method", e.target.value)}
               placeholder="Semua"
               themeColor="emerald"
               options={[
@@ -767,10 +786,15 @@ export default function Cashflow() {
           </div>
         </div>
 
-        {/* Bagian Transaksi */}
-        <div className="bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50 overflow-hidden shadow-sm dark:shadow-none">
-          <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700/50">
-            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-500">
+        {/* Bagian Transaksi - Attractive & Professional */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+          <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/30 dark:to-gray-800/30">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <TransactionOrder
+                theme="filled"
+                size={20}
+                className="text-emerald-600 dark:text-emerald-400"
+              />
               Riwayat Transaksi
             </h2>
           </div>
@@ -862,32 +886,32 @@ export default function Cashflow() {
                 ))}
               </div>
 
-              {/* Desktop Table View */}
-              <div className="hidden lg:block overflow-x-auto">
+              {/* Desktop Table View - Attractive & Professional */}
+              <div className="hidden lg:block overflow-x-auto rounded-lg shadow-md">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Tanggal
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Deskripsi
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
                         Jumlah
                       </th>
-                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
                         Aksi
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700/50">
-                    {transactions.map((transaction) => (
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {transactions.map((transaction, index) => (
                       <tr
                         key={transaction.cashflow_id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        className={`hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700/30'}`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                           {new Date(transaction.date).toLocaleDateString(
                             "id-ID",
                             {
@@ -899,35 +923,41 @@ export default function Cashflow() {
                         </td>
                         <td className="px-6 py-4">
                           <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                               {transaction.description || "-"}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              {transaction.category} • {transaction.method}
-                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                          {transaction.category}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">•</span>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                          {transaction.method}
+                              </span>
+                            </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
                           <p
-                            className={`text-sm font-semibold ${
-                              transaction.type === "income"
-                                ? "text-green-600 dark:text-green-400"
-                                : "text-red-600 dark:text-red-400"
-                            }`}
-                          >
-                            {transaction.type === "expense" ? "-" : "+"}
-                            {formatCurrency(transaction.amount)}
+                            className={`text-sm font-bold ${
+                            transaction.type === "income"
+                                ? "text-green-700 dark:text-green-400"
+                                : "text-red-700 dark:text-red-400"
+                          }`}
+                        >
+                          {transaction.type === "expense" ? "-" : "+"}
+                          {formatCurrency(transaction.amount)}
                           </p>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <button
+                            <button
                             onClick={() => handleViewDetail(transaction)}
                             className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg transition-all active:scale-95"
                             disabled={loading}
                             title="Lihat Detail"
                           >
                             <span>Detail</span>
-                          </button>
+                            </button>
                         </td>
                       </tr>
                     ))}
@@ -1044,14 +1074,14 @@ export default function Cashflow() {
       />
 
       {/* Modal Edit Transaksi */}
-      {editTransactionId && (
+      {editTransactionId && editTransactionData && (
         <EditCashflowModal
-          isOpen={!!editTransactionId}
-          onClose={() => setEditTransactionId(null)}
-          onSubmit={(data) => handleEditTransaction(editTransactionId, data)}
+          editTransactionId={editTransactionId}
+          setEditTransactionId={setEditTransactionId}
           transactionData={editTransactionData}
           categories={categories}
           methods={methods}
+          onEditTransaction={handleEditTransaction}
         />
       )}
 

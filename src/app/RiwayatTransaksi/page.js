@@ -17,6 +17,8 @@ import {
   Wallet,
   Goods,
   Dollar,
+  PaperMoney,
+  ChartLineArea,
 } from "@icon-park/react";
 import { AlertCircle } from "react-feather";
 import DetailTransaksi from "../component/Modal/DetilTransaksiModal";
@@ -386,13 +388,13 @@ const LaporanTransaksi = () => {
   // Format currency
   const formatCurrency = (value) => {
     if (value === null || value === undefined || value === "") return "Rp 0";
-    
-    const numValue = typeof value === "string" ? parseFloat(value) : (value || 0);
+
+    const numValue = typeof value === "string" ? parseFloat(value) : value || 0;
     if (isNaN(numValue)) return "Rp 0";
-    
+
     // Check if number has decimal part
     const hasDecimal = numValue % 1 !== 0;
-    
+
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -459,14 +461,18 @@ const LaporanTransaksi = () => {
 
       // Download file from backend
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      
+
       if (!apiUrl) {
-        toast.error("API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL");
+        toast.error(
+          "API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL"
+        );
         return;
       }
-      
+
       const response = await fetch(
-        `${apiUrl}${API_ENDPOINTS.TRANSACTIONS_EXPORT_EXCEL}?${params.toString()}`,
+        `${apiUrl}${
+          API_ENDPOINTS.TRANSACTIONS_EXPORT_EXCEL
+        }?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -555,14 +561,18 @@ const LaporanTransaksi = () => {
 
       // Download file from backend
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      
+
       if (!apiUrl) {
-        toast.error("API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL");
+        toast.error(
+          "API URL tidak dikonfigurasi. Silakan set NEXT_PUBLIC_API_URL"
+        );
         return;
       }
-      
+
       const response = await fetch(
-        `${apiUrl}${API_ENDPOINTS.TRANSACTIONS_EXPORT_PDF}?${params.toString()}`,
+        `${apiUrl}${
+          API_ENDPOINTS.TRANSACTIONS_EXPORT_PDF
+        }?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -621,11 +631,11 @@ const LaporanTransaksi = () => {
                 />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-gray-500">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
                   Laporan Transaksi
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Riwayat dan laporan transaksi penjualan
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                  Transaction Report
                 </p>
               </div>
             </div>
@@ -670,16 +680,18 @@ const LaporanTransaksi = () => {
           </div>
         )}
 
-        {/* Filter Section */}
-        <div className="bg-white dark:bg-gray-800/50 p-3 sm:p-5 rounded-lg border border-gray-200 dark:border-gray-700/50 mb-4 sm:mb-6 shadow-sm dark:shadow-none">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <Filter
-                theme="filled"
-                size={18}
-                className="text-gray-600 dark:text-gray-300"
-              />
-              <h2 className="text-base font-semibold text-gray-900 dark:text-gray-500">
+        {/* Filter Section - Professional Design */}
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg border-2 border-gray-300 dark:border-gray-600 mb-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-5 pb-4 border-b-2 border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                <Filter
+                  theme="filled"
+                  size={18}
+                  className="text-gray-700 dark:text-gray-300"
+                />
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
                 Filter
               </h2>
             </div>
@@ -689,8 +701,14 @@ const LaporanTransaksi = () => {
                 disabled={isExporting || isLoading}
                 className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 dark:from-red-500 dark:to-red-600 dark:hover:from-red-600 dark:hover:to-red-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95 min-h-[40px] sm:min-h-[36px] flex-1 sm:flex-initial"
               >
-                <FilePdf theme="filled" size={16} className="sm:w-[18px] sm:h-[18px]" />
-                <span className="hidden xs:inline">{isExporting ? "Mengekspor..." : "PDF"}</span>
+                <FilePdf
+                  theme="filled"
+                  size={16}
+                  className="sm:w-[18px] sm:h-[18px]"
+                />
+                <span className="hidden xs:inline">
+                  {isExporting ? "Mengekspor..." : "PDF"}
+                </span>
                 <span className="xs:hidden">{isExporting ? "..." : "PDF"}</span>
               </button>
               <button
@@ -698,9 +716,17 @@ const LaporanTransaksi = () => {
                 disabled={isExporting || isLoading}
                 className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95 min-h-[40px] sm:min-h-[36px] flex-1 sm:flex-initial"
               >
-                <FileExcel theme="filled" size={16} className="sm:w-[18px] sm:h-[18px]" />
-                <span className="hidden xs:inline">{isExporting ? "Mengekspor..." : "Excel"}</span>
-                <span className="xs:hidden">{isExporting ? "..." : "Excel"}</span>
+                <FileExcel
+                  theme="filled"
+                  size={16}
+                  className="sm:w-[18px] sm:h-[18px]"
+                />
+                <span className="hidden xs:inline">
+                  {isExporting ? "Mengekspor..." : "Excel"}
+                </span>
+                <span className="xs:hidden">
+                  {isExporting ? "..." : "Excel"}
+                </span>
               </button>
               <button
                 onClick={() => {
@@ -813,105 +839,105 @@ const LaporanTransaksi = () => {
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 lg:p-5 border-2 border-gray-200 dark:border-gray-700 shadow-md dark:shadow-none">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
+        {/* Summary Cards - Attractive & Professional */}
+        <div className="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-xl shadow-lg dark:shadow-xl mb-6 border border-gray-200 dark:border-gray-700">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-5 pb-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+            <ChartLineArea
+              theme="filled"
+              size={20}
+              className="text-blue-600 dark:text-blue-400"
+            />
+            Ringkasan Transaksi
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-indigo-200 dark:border-indigo-700/50">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
                   Pendapatan
                 </p>
-                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-500 truncate">
-                  {formatCurrency(pendapatan)}
-                </p>
+                <div className="p-1.5 bg-white dark:bg-indigo-900/30 rounded-lg shadow-sm">
+                  <Dollar
+                    theme="filled"
+                    size={16}
+                    className="text-indigo-600 dark:text-indigo-400"
+                  />
+                </div>
               </div>
-              <div className="p-1.5 sm:p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex-shrink-0 self-start sm:self-auto">
-                <Dollar
-                  theme="filled"
-                  size={16}
-                  className="sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400"
-                />
-              </div>
+              <p className="text-lg sm:text-xl font-bold text-indigo-900 dark:text-indigo-100">
+                {formatCurrency(pendapatan)}
+              </p>
             </div>
-          </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 lg:p-5 border-2 border-gray-200 dark:border-gray-700 shadow-md dark:shadow-none">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
-                  Income QRIS
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-blue-200 dark:border-blue-700/50">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+                  QRIS
                 </p>
-                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-500 truncate">
-                  {formatCurrency(incomeQRIS)}
-                </p>
+                <div className="p-1.5 bg-white dark:bg-blue-900/30 rounded-lg shadow-sm">
+                  <Wallet
+                    theme="filled"
+                    size={16}
+                    className="text-blue-600 dark:text-blue-400"
+                  />
+                </div>
               </div>
-              <div className="p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex-shrink-0 self-start sm:self-auto">
-                <Wallet
-                  theme="filled"
-                  size={16}
-                  className="sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400"
-                />
-              </div>
+              <p className="text-lg sm:text-xl font-bold text-blue-900 dark:text-blue-100">
+                {formatCurrency(incomeQRIS)}
+              </p>
             </div>
-          </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 lg:p-5 border-2 border-gray-200 dark:border-gray-700 shadow-md dark:shadow-none">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
-                  Income Cash
+            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-green-200 dark:border-green-700/50">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-green-700 dark:text-green-300">
+                  Cash
                 </p>
-                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-500 truncate">
-                  {formatCurrency(incomeCash)}
-                </p>
+                <div className="p-1.5 bg-white dark:bg-green-900/30 rounded-lg shadow-sm">
+                  <PaperMoney
+                    theme="filled"
+                    size={16}
+                    className="text-green-600 dark:text-green-400"
+                  />
+                </div>
               </div>
-              <div className="p-1.5 sm:p-2 bg-green-100 dark:bg-green-900/30 rounded-lg flex-shrink-0 self-start sm:self-auto">
-                <Dollar
-                  theme="filled"
-                  size={16}
-                  className="sm:w-5 sm:h-5 text-green-600 dark:text-green-400"
-                />
-              </div>
+              <p className="text-lg sm:text-xl font-bold text-green-900 dark:text-green-100">
+                {formatCurrency(incomeCash)}
+              </p>
             </div>
-          </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 lg:p-5 border-2 border-gray-200 dark:border-gray-700 shadow-md dark:shadow-none">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
-                  Total Transaksi
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-purple-200 dark:border-purple-700/50">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">
+                  Transaksi
                 </p>
-                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-500 truncate">
-                  {totalTransaksi}
-                </p>
+                <div className="p-1.5 bg-white dark:bg-purple-900/30 rounded-lg shadow-sm">
+                  <TransactionOrder
+                    theme="filled"
+                    size={16}
+                    className="text-purple-600 dark:text-purple-400"
+                  />
+                </div>
               </div>
-              <div className="p-1.5 sm:p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex-shrink-0 self-start sm:self-auto">
-                <TransactionOrder
-                  theme="filled"
-                  size={16}
-                  className="sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400"
-                />
-              </div>
+              <p className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100">
+                {totalTransaksi}
+              </p>
             </div>
-          </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 lg:p-5 border-2 border-gray-200 dark:border-gray-700 shadow-md dark:shadow-none">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] xs:text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
-                  Total Barang
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 p-4 sm:p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-pink-200 dark:border-pink-700/50">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-pink-700 dark:text-pink-300">
+                  Barang
                 </p>
-                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-500 truncate">
-                  {totalBarang}
-                </p>
+                <div className="p-1.5 bg-white dark:bg-pink-900/30 rounded-lg shadow-sm">
+                  <ShoppingBag
+                    theme="filled"
+                    size={16}
+                    className="text-pink-600 dark:text-pink-400"
+                  />
+                </div>
               </div>
-              <div className="p-1.5 sm:p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex-shrink-0 self-start sm:self-auto">
-                <ShoppingBag
-                  theme="filled"
-                  size={16}
-                  className="sm:w-5 sm:h-5 text-pink-600 dark:text-pink-400"
-                />
-              </div>
+              <p className="text-lg sm:text-xl font-bold text-pink-900 dark:text-pink-100">
+                {totalBarang}
+              </p>
             </div>
           </div>
         </div>
@@ -984,81 +1010,97 @@ const LaporanTransaksi = () => {
               )}
             </div>
 
-            {/* Desktop Table View */}
-            <div className="hidden lg:block overflow-x-auto bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50 shadow-sm dark:shadow-none">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700/50">
-                <thead className="bg-gray-50 dark:bg-gray-800/50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                      Tanggal
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                      Total
-                    </th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700/50">
-                  {currentTransactions.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
-                      >
-                        <div className="flex flex-col items-center">
-                          <div className="text-4xl mb-2">📋</div>
-                          <p>Tidak ada data transaksi</p>
-                        </div>
-                      </td>
+            {/* Desktop Table View - Attractive & Professional */}
+            <div className="hidden lg:block overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-700">
+              <div className="rounded-lg shadow-md overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        ID
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        Tanggal
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                        Total
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                        Aksi
+                      </th>
                     </tr>
-                  ) : (
-                    currentTransactions.map((trx) => (
-                      <tr
-                        key={trx.transaction_id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                              #{trx.transaction_id}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              Shift #{trx.shift_id} • {trx.kasir} • {trx.metodePembayaran}
-                            </p>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {currentTransactions.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="4"
+                          className="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
+                        >
+                          <div className="flex flex-col items-center">
+                            <div className="text-4xl mb-2">📋</div>
+                            <p>Tidak ada data transaksi</p>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(trx.tanggal).toLocaleDateString("id-ID", {
-                            weekday: "long",
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                            {formatCurrency(trx.total)}
-                          </p>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <button
-                            onClick={() => handleDetil(trx)}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-all active:scale-95"
-                            title="Lihat Detail"
-                          >
-                            <span>Detail</span>
-                          </button>
-                        </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      currentTransactions.map((trx, index) => (
+                        <tr
+                          key={trx.transaction_id}
+                          className={`hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors ${
+                            index % 2 === 0
+                              ? "bg-white dark:bg-gray-800"
+                              : "bg-gray-50 dark:bg-gray-700/30"
+                          }`}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                #{trx.transaction_id}
+                              </p>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                  Shift #{trx.shift_id}
+                                </span>
+                                <span className="text-xs text-gray-400">•</span>
+                                <span className="text-xs text-gray-600 dark:text-gray-400">
+                                  {trx.kasir}
+                                </span>
+                                <span className="text-xs text-gray-400">•</span>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                  {trx.metodePembayaran}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                            {new Date(trx.tanggal).toLocaleDateString("id-ID", {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <p className="text-sm font-bold text-indigo-700 dark:text-indigo-400">
+                              {formatCurrency(trx.total)}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <button
+                              onClick={() => handleDetil(trx)}
+                              className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg shadow-sm hover:shadow transition-all active:scale-95"
+                              title="Lihat Detail"
+                            >
+                              <span>Detail</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Pagination */}

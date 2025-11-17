@@ -14,6 +14,7 @@ const Dropdown = ({
   optgroups = null, // For grouped options like { label: "Group", options: [...] }
   name, // For form compatibility
   themeColor = "purple", // purple, green, emerald, amber, blue
+  placement = "bottom", // "top" or "bottom" - untuk menentukan posisi dropdown terbuka
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -161,7 +162,9 @@ const Dropdown = ({
             className="fixed inset-0 z-[100] lg:hidden bg-black/20"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute z-[101] w-full mt-1 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-60 overflow-auto">
+          <div className={`absolute z-[101] w-full ${
+            placement === "top" ? "bottom-full mb-1" : "top-full mt-1"
+          } bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-60 overflow-auto`}>
             {optgroups ? (
               // Render with optgroups
               optgroups.map((group, groupIndex) => (

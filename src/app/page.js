@@ -6,17 +6,7 @@ import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/app/lib/api";
 
 // API URL must be set via environment variable
-// Fallback to production URL if not set (for safety)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nacshier.my.id";
-
-if (!process.env.NEXT_PUBLIC_API_URL) {
-  console.warn("⚠️ NEXT_PUBLIC_API_URL not set, using fallback:", API_BASE_URL);
-}
-
-// Debug: Log API URL in development
-if (process.env.NODE_ENV === 'development') {
-  console.log("🔍 API_BASE_URL:", API_BASE_URL);
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -50,10 +40,6 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // Debug: Log API URL before request
-      console.log("🔍 API_BASE_URL:", API_BASE_URL);
-      console.log("🔍 Login URL:", `${API_BASE_URL}${API_ENDPOINTS.LOGIN}`);
-      
       // Gunakan fetch langsung dengan error handling yang lebih baik
       const loginUrl = `${API_BASE_URL}${API_ENDPOINTS.LOGIN}`;
       const response = await fetch(loginUrl, {
@@ -65,23 +51,27 @@ export default function LoginPage() {
         body: JSON.stringify({ username, password }),
       });
 
-      // Check content type sebelum parsing
       const contentType = response.headers.get("content-type");
-      
-      // Clone response untuk bisa dibaca beberapa kali
-      const responseClone = response.clone();
 
-      // Jika response bukan JSON, handle sebagai error
+      const responseClone = response.clone();
       if (!contentType || !contentType.includes("application/json")) {
         const text = await responseClone.text();
-        if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
+        if (
+          text.trim().startsWith("<!DOCTYPE") ||
+          text.trim().startsWith("<html")
+        ) {
           setError(
             "Server mengembalikan halaman error. Pastikan server backend berjalan dan endpoint tersedia."
           );
           console.error("HTML Response:", text.substring(0, 200));
           return;
         }
-        setError(`Server error: ${response.status}. Response: ${text.substring(0, 100)}`);
+        setError(
+          `Server error: ${response.status}. Response: ${text.substring(
+            0,
+            100
+          )}`
+        );
         return;
       }
 
@@ -97,14 +87,11 @@ export default function LoginPage() {
         return;
       }
 
-      // Handle response
       if (response.ok && data.token) {
-        // Simpan data ke localStorage (simpan di kedua tempat untuk kompatibilitas)
         localStorage.setItem("token", data.token);
         localStorage.setItem("auth_token", data.token);
         setUserInfo(data.user);
 
-        // Handle shift untuk kasir (level "user" atau "kasir")
         if (data.user.level === "user" || data.user.level === "kasir") {
           if (data.shift) {
             localStorage.setItem("currentShift", JSON.stringify(data.shift));
@@ -116,14 +103,12 @@ export default function LoginPage() {
           }
         }
 
-        // Handle remember me
         if (remember) {
           localStorage.setItem("rememberedUser", username);
         } else {
           localStorage.removeItem("rememberedUser");
         }
 
-        // Redirect langsung untuk admin (non-kasir)
         if (data.user.level === "admin") {
           router.push("/Dashboard");
         }
@@ -135,7 +120,9 @@ export default function LoginPage() {
       if (err.message) {
         setError(err.message);
       } else {
-        setError("Terjadi kesalahan jaringan atau server offline. Pastikan server backend berjalan.");
+        setError(
+          "Terjadi kesalahan jaringan atau server offline. Pastikan server backend berjalan."
+        );
       }
     } finally {
       setIsLoading(false);
@@ -159,7 +146,9 @@ export default function LoginPage() {
               </h3>
 
               <div className="mb-4">
-                <p className="text-gray-700 dark:text-gray-300 mb-2">Informasi Shift:</p>
+                <p className="text-gray-700 dark:text-gray-300 mb-2">
+                  Informasi Shift:
+                </p>
                 <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-md">
                   <p className="text-sm text-gray-700 dark:text-gray-300">
                     <span className="font-medium">ID Shift:</span>{" "}
@@ -171,7 +160,9 @@ export default function LoginPage() {
                   </p>
                   <p className="text-sm mt-1 text-gray-700 dark:text-gray-300">
                     <span className="font-medium">Status:</span>{" "}
-                    <span className="text-green-600 dark:text-green-400">Aktif</span>
+                    <span className="text-green-600 dark:text-green-400">
+                      Aktif
+                    </span>
                   </p>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
@@ -262,7 +253,10 @@ export default function LoginPage() {
                 />
                 Ingat Username
               </label>
-              <a href="#" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+              <a
+                href="#"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+              >
                 Lupa Password?
               </a>
             </div>

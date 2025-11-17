@@ -337,49 +337,52 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6">
-      {/* Header Card */}
-      <div className="bg-white shadow-lg rounded-2xl p-4 mb-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-100 rounded-xl">
-              <UserBusiness
-                theme="filled"
-                size={28}
-                className="text-indigo-600"
-              />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                <UserBusiness
+                  theme="filled"
+                  size={24}
+                  className="text-indigo-600 dark:text-indigo-400"
+                />
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  Manajemen User
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Kelola pengguna dan akses sistem
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-200">
-                Manajemen User
-              </h1>
-              <p className="text-sm text-gray-500">
-                Kelola pengguna dan akses sistem
-              </p>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <button
+                onClick={handleAddUser}
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-2.5 border border-transparent rounded-xl shadow-md hover:shadow-lg text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 dark:from-indigo-500 dark:to-indigo-600 dark:hover:from-indigo-600 dark:hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-95 min-h-[44px] flex-1 sm:flex-initial"
+              >
+                <AddOne theme="filled" size={18} className="sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Tambah User</span>
+                <span className="sm:hidden">Tambah</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-2.5 border border-transparent rounded-xl shadow-md hover:shadow-lg text-sm font-bold text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 dark:from-red-500 dark:to-red-600 dark:hover:from-red-600 dark:hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all active:scale-95 min-h-[44px] flex-1 sm:flex-initial"
+              >
+                <Logout theme="filled" size={18} className="sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Logout</span>
+                <span className="sm:hidden">Keluar</span>
+              </button>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleAddUser}
-              className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 sm:py-2.5 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-95 min-h-[48px] sm:min-h-[44px]"
-            >
-              <AddOne theme="filled" size={20} className="sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Tambah User</span>
-              <span className="sm:hidden">Tambah</span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 sm:py-2.5 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all active:scale-95 min-h-[48px] sm:min-h-[44px]"
-            >
-              <Logout theme="filled" size={20} className="sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Logout</span>
-              <span className="sm:hidden">Keluar</span>
-            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      {/* Body */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Status Messages */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl shadow-sm">
@@ -473,32 +476,37 @@ export default function UserManagement() {
               ))}
             </div>
 
-            {/* Desktop Table View */}
-            <div className="hidden lg:block bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            {/* Desktop Table View - Enhanced */}
+            <div className="hidden lg:block bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                        Nama
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-indigo-600 dark:to-indigo-700">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        User
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        Username
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                         Level
                       </th>
-                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
                         Aksi
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
-                    {users.map((user) => (
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {users.map((user, index) => (
                       <tr
                         key={user.user_id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        className={`hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors ${
+                          index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700/30'
+                        }`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-md">
                               <UserBusiness
                                 theme="filled"
                                 size={20}
@@ -506,35 +514,64 @@ export default function UserManagement() {
                               />
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                 {user.name}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                @{user.username}
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                ID: {user.user_id}
                               </p>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-400 dark:text-gray-500">@</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              {user.username}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`px-3 py-1.5 inline-flex items-center text-xs font-semibold rounded-full ${
+                            className={`px-3 py-1.5 inline-flex items-center text-xs font-bold rounded-full shadow-sm ${
                               user.level === "admin"
-                                ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
-                                : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                                ? "bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-700"
+                                : "bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700"
                             }`}
                           >
                             {user.level === "admin" ? "Admin" : "Kasir"}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <button
-                            onClick={() => handleViewDetail(user)}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-all active:scale-95"
-                            disabled={isLoading}
-                            title="Lihat Detail"
-                          >
-                            <span>Detail</span>
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleEditUser(user)}
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-all active:scale-95 shadow-sm"
+                              disabled={isLoading}
+                              title="Edit User"
+                            >
+                              <Edit theme="filled" size={14} />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              onClick={() => handleChangePassword(user)}
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-all active:scale-95 shadow-sm"
+                              disabled={isLoading}
+                              title="Ubah Password"
+                            >
+                              <Lock theme="filled" size={14} />
+                              <span>Password</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user)}
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-all active:scale-95 shadow-sm"
+                              disabled={isLoading}
+                              title="Hapus User"
+                            >
+                              <Delete theme="filled" size={14} />
+                              <span>Hapus</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -548,15 +585,16 @@ export default function UserManagement() {
 
       {/* User Form Modal */}
       {showForm && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-0 px-0 pb-0 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity"
-              aria-hidden="true"
-              onClick={handleCloseForm}
-            ></div>
+        <div className="fixed z-[60] inset-0 overflow-y-auto flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity"
+            aria-hidden="true"
+            onClick={handleCloseForm}
+          ></div>
 
-            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-none sm:rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border-0 sm:border border-gray-100 dark:border-gray-700 w-full h-full sm:h-auto flex flex-col">
+          {/* Modal Content */}
+          <div className="relative bg-white dark:bg-gray-800 rounded-none sm:rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all w-full h-full sm:h-auto sm:max-w-lg lg:max-w-lg border-0 sm:border border-gray-100 dark:border-gray-700 flex flex-col max-h-[90vh]">
               {/* Sticky Header */}
               <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 sm:px-8 py-4 flex-shrink-0">
                 <div className="flex justify-between items-center">
@@ -740,7 +778,6 @@ export default function UserManagement() {
                 </div>
               </div>
             </div>
-          </div>
         </div>
       )}
 
