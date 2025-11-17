@@ -17,7 +17,7 @@ import {
   ArrowDown,
   Filter,
 } from "@icon-park/react";
-import { api, API_ENDPOINTS, formatNumber } from "@/app/lib/api";
+import { api, API_ENDPOINTS, formatNumber, auth } from "@/app/lib/api";
 import { getImageUrl } from "@/config/api";
 import Dropdown from "../component/Dropdown";
 
@@ -33,9 +33,31 @@ const Transaction = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [currentShiftId, setCurrentShiftId] = useState(null);
+  const [userLevel, setUserLevel] = useState(null); // Store user level
   const cartRef = useRef(null);
 
-  // Fetch current shift
+  // Fetch user profile and current shift
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const userData = await auth.getProfile();
+        if (userData && userData.level) {
+          setUserLevel(userData.level);
+
+          // Jika kasir, fetch shift. Jika admin, skip shift
+          if (userData.level === "kasir" || userData.level === "user") {
+            await fetchCurrentShift();
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  // Fetch current shift (hanya untuk kasir)
   const fetchCurrentShift = async () => {
     try {
       // Cek dulu dari localStorage
@@ -218,7 +240,9 @@ const Transaction = () => {
         // Cek stock saat menambah quantity
         const newQuantity = existing.quantity + 1;
         if (newQuantity > product.stock) {
-          toast.warning(`Stok ${product.name} tidak mencukupi! Stok tersedia: ${product.stock}`);
+          toast.warning(
+            `Stok ${product.name} tidak mencukupi! Stok tersedia: ${product.stock}`
+          );
           return prevItems; // Tidak update jika stock tidak mencukupi
         }
         return prevItems.map((item) =>
@@ -242,18 +266,18 @@ const Transaction = () => {
     setCartItems((prevItems) => {
       const item = prevItems.find((i) => i.product_id === productId);
       if (!item) return prevItems;
-      
+
       // Cek stock sebelum menambah quantity
       const newQuantity = item.quantity + 1;
       if (newQuantity > item.stock) {
-        toast.warning(`Stok ${item.name} tidak mencukupi! Stok tersedia: ${item.stock}`);
+        toast.warning(
+          `Stok ${item.name} tidak mencukupi! Stok tersedia: ${item.stock}`
+        );
         return prevItems; // Tidak update jika stock tidak mencukupi
       }
-      
+
       return prevItems.map((i) =>
-        i.product_id === productId
-          ? { ...i, quantity: newQuantity }
-          : i
+        i.product_id === productId ? { ...i, quantity: newQuantity } : i
       );
     });
   };
@@ -302,8 +326,10 @@ const Transaction = () => {
       return;
     }
 
-    // Pastikan shift_id valid
-    if (!currentShiftId) {
+    const isAdmin = userLevel === "admin";
+
+    // Validasi shift_id hanya untuk kasir (admin tidak perlu shift_id)
+    if (!isAdmin && !currentShiftId) {
       toast.error("Shift tidak ditemukan. Silakan login ulang.");
       return;
     }
@@ -323,8 +349,9 @@ const Transaction = () => {
       }
     }
 
+    // Prepare transaction data
+    // Admin tidak perlu shift_id, kasir wajib shift_id
     const transactionData = {
-      shift_id: currentShiftId,
       total_amount: total,
       payment_method: paymentMethod,
       items: cartItems.map((item) => ({
@@ -335,6 +362,11 @@ const Transaction = () => {
         // selling_price: parseFloat(item.selling_price)
       })),
     };
+
+    // Hanya tambahkan shift_id jika user adalah kasir
+    if (!isAdmin && currentShiftId) {
+      transactionData.shift_id = currentShiftId;
+    }
 
     console.log("Sending transaction data:", transactionData); // Debug log
 

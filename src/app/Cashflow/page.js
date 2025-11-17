@@ -38,6 +38,8 @@ export default function Cashflow() {
   const [loading, setLoading] = useState(true);
 
   // State untuk filter
+  const [periode, setPeriode] = useState("semua"); // semua, harian, mingguan, bulanan, custom
+  const [tanggal, setTanggal] = useState("");
   const [filters, setFilters] = useState({
     search: "",
     category: "",
@@ -55,7 +57,7 @@ export default function Cashflow() {
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
-    per_page: 10,
+    per_page: 25, // Default 25 items per page
     total: 0,
   });
 
@@ -75,15 +77,78 @@ export default function Cashflow() {
     fetchMethods();
   }, []);
 
-  // Fetch data ketika filters atau pagination berubah
+  // Initialize dates
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    setTanggal(today);
+    if (!filters.start_date) setFilters((prev) => ({ ...prev, start_date: today }));
+    if (!filters.end_date) setFilters((prev) => ({ ...prev, end_date: today }));
+  }, []);
+
+  // Set default dates for weekly, monthly, and custom periods
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    
+    if (periode === "mingguan") {
+      const todayDate = new Date();
+      const firstDayOfWeek = new Date(todayDate);
+      firstDayOfWeek.setDate(todayDate.getDate() - todayDate.getDay());
+
+      setFilters((prev) => ({
+        ...prev,
+        start_date: firstDayOfWeek.toISOString().split("T")[0],
+        end_date: today,
+      }));
+    } else if (periode === "bulanan") {
+      const todayDate = new Date();
+      const firstDayOfMonth = new Date(
+        todayDate.getFullYear(),
+        todayDate.getMonth(),
+        1
+      );
+
+      setFilters((prev) => ({
+        ...prev,
+        start_date: firstDayOfMonth.toISOString().split("T")[0],
+        end_date: today,
+      }));
+    } else if (periode === "custom") {
+      // Set default custom range to last 30 days
+      const todayDate = new Date();
+      const thirtyDaysAgo = new Date(todayDate);
+      thirtyDaysAgo.setDate(todayDate.getDate() - 30);
+
+      setFilters((prev) => ({
+        ...prev,
+        start_date: thirtyDaysAgo.toISOString().split("T")[0],
+        end_date: today,
+      }));
+    } else if (periode === "harian") {
+      setFilters((prev) => ({
+        ...prev,
+        start_date: tanggal,
+        end_date: tanggal,
+      }));
+    } else if (periode === "semua") {
+      setFilters((prev) => ({
+        ...prev,
+        start_date: "",
+        end_date: "",
+      }));
+    }
+  }, [periode, tanggal]);
+
+  // Fetch data ketika filters, periode, atau pagination berubah
   useEffect(() => {
     fetchData();
-  }, [filters, pagination.current_page, pagination.per_page]);
+  }, [filters, pagination.current_page, pagination.per_page, periode]);
 
   // Reset ke halaman pertama ketika filter berubah
   useEffect(() => {
     setPagination((prev) => ({ ...prev, current_page: 1 }));
   }, [
+    periode,
+    tanggal,
     filters.search,
     filters.category,
     filters.method,
@@ -97,12 +162,42 @@ export default function Cashflow() {
     try {
       const queryParams = new URLSearchParams();
 
-      // Tambahkan parameter filter yang memiliki nilai
+      // Set period parameter
+      if (periode === "harian" && tanggal) {
+        queryParams.append("period", "daily");
+        queryParams.append("date", tanggal);
+      } else if (periode === "mingguan") {
+        queryParams.append("period", "weekly");
+        if (filters.start_date && filters.end_date) {
+          queryParams.append("start_date", filters.start_date);
+          queryParams.append("end_date", filters.end_date);
+        }
+      } else if (periode === "bulanan") {
+        queryParams.append("period", "monthly");
+        if (filters.start_date && filters.end_date) {
+          queryParams.append("start_date", filters.start_date);
+          queryParams.append("end_date", filters.end_date);
+        }
+      } else if (periode === "custom" && filters.start_date && filters.end_date) {
+        queryParams.append("period", "custom");
+        queryParams.append("start_date", filters.start_date);
+        queryParams.append("end_date", filters.end_date);
+      } else if (periode === "semua") {
+        queryParams.append("period", "all");
+      }
+
+      // Tambahkan parameter filter lainnya yang memiliki nilai
       Object.entries(filters).forEach(([key, value]) => {
-        if (value && value.trim() !== "") {
+        if (value && value.trim() !== "" && key !== "start_date" && key !== "end_date") {
           queryParams.append(key, value.trim());
         }
       });
+
+      // Tambahkan start_date dan end_date jika periode bukan "semua"
+      if (periode !== "semua") {
+        if (filters.start_date) queryParams.append("start_date", filters.start_date);
+        if (filters.end_date) queryParams.append("end_date", filters.end_date);
+      }
 
       // Tambahkan parameter pagination
       queryParams.append("page", pagination.current_page);
@@ -149,7 +244,7 @@ export default function Cashflow() {
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.current_page, pagination.per_page]);
+  }, [filters, pagination.current_page, pagination.per_page, periode, tanggal]);
 
   const fetchCategories = async () => {
     try {
@@ -207,18 +302,34 @@ export default function Cashflow() {
 
   // Reset semua filter
   const handleResetFilters = () => {
+    const today = new Date().toISOString().split("T")[0];
+    setPeriode("harian");
+    setTanggal(today);
     setFilters({
       search: "",
       category: "",
       method: "",
-      start_date: "",
-      end_date: "",
+      start_date: today,
+      end_date: today,
       type: "",
     });
+    setPagination((prev) => ({ ...prev, current_page: 1 }));
     // Clear debounce timer
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
+  };
+
+  // Handle period change
+  const handlePeriodeChange = (newPeriode) => {
+    setPeriode(newPeriode);
+    setPagination((prev) => ({ ...prev, current_page: 1 }));
+  };
+
+  // Handle date change for daily period
+  const handleTanggalChange = (newTanggal) => {
+    setTanggal(newTanggal);
+    setPagination((prev) => ({ ...prev, current_page: 1 }));
   };
 
   // Handler untuk CRUD operations
@@ -352,8 +463,27 @@ export default function Cashflow() {
 
       // Prepare request parameters
       const params = new URLSearchParams();
-      if (filters.start_date) params.append("start_date", filters.start_date);
-      if (filters.end_date) params.append("end_date", filters.end_date);
+      
+      // Set period parameter
+      if (periode === "harian") {
+        params.append("period", "daily");
+        if (tanggal) params.append("date", tanggal);
+      } else if (periode === "mingguan") {
+        params.append("period", "weekly");
+        if (filters.start_date) params.append("start_date", filters.start_date);
+        if (filters.end_date) params.append("end_date", filters.end_date);
+      } else if (periode === "bulanan") {
+        params.append("period", "monthly");
+        if (filters.start_date) params.append("start_date", filters.start_date);
+        if (filters.end_date) params.append("end_date", filters.end_date);
+      } else if (periode === "custom") {
+        params.append("period", "custom");
+        if (filters.start_date) params.append("start_date", filters.start_date);
+        if (filters.end_date) params.append("end_date", filters.end_date);
+      } else if (periode === "semua") {
+        params.append("period", "all");
+      }
+      
       if (filters.type) params.append("type", filters.type);
       if (filters.category) params.append("category", filters.category);
       if (filters.method) params.append("method", filters.method);
@@ -427,8 +557,27 @@ export default function Cashflow() {
 
       // Prepare request parameters
       const params = new URLSearchParams();
-      if (filters.start_date) params.append("start_date", filters.start_date);
-      if (filters.end_date) params.append("end_date", filters.end_date);
+      
+      // Set period parameter
+      if (periode === "harian") {
+        params.append("period", "daily");
+        if (tanggal) params.append("date", tanggal);
+      } else if (periode === "mingguan") {
+        params.append("period", "weekly");
+        if (filters.start_date) params.append("start_date", filters.start_date);
+        if (filters.end_date) params.append("end_date", filters.end_date);
+      } else if (periode === "bulanan") {
+        params.append("period", "monthly");
+        if (filters.start_date) params.append("start_date", filters.start_date);
+        if (filters.end_date) params.append("end_date", filters.end_date);
+      } else if (periode === "custom") {
+        params.append("period", "custom");
+        if (filters.start_date) params.append("start_date", filters.start_date);
+        if (filters.end_date) params.append("end_date", filters.end_date);
+      } else if (periode === "semua") {
+        params.append("period", "all");
+      }
+      
       if (filters.type) params.append("type", filters.type);
       if (filters.category) params.append("category", filters.category);
       if (filters.method) params.append("method", filters.method);
@@ -686,7 +835,69 @@ export default function Cashflow() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            {/* Period Dropdown */}
+            <Dropdown
+              label="Periode"
+              value={periode}
+              onChange={(e) => handlePeriodeChange(e.target.value)}
+              placeholder="Pilih periode"
+              themeColor="emerald"
+              options={[
+                { value: "semua", label: "Semua" },
+                { value: "harian", label: "Harian" },
+                { value: "mingguan", label: "Mingguan" },
+                { value: "bulanan", label: "Bulanan" },
+                { value: "custom", label: "Custom (Rentang Tanggal)" },
+              ]}
+            />
+
+            {/* Date Input - Conditional based on period */}
+            {periode === "semua" ? null : periode === "harian" ? (
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Tanggal
+                </label>
+                <input
+                  type="date"
+                  className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm bg-white dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  value={tanggal}
+                  onChange={(e) => handleTanggalChange(e.target.value)}
+                  max={new Date().toISOString().split("T")[0]}
+                />
+              </div>
+            ) : (periode === "mingguan" || periode === "bulanan" || periode === "custom") ? (
+              <>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Dari Tanggal
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm bg-white dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    value={filters.start_date}
+                    onChange={(e) =>
+                      handleFilterChange("start_date", e.target.value)
+                    }
+                    max={new Date().toISOString().split("T")[0]}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Sampai Tanggal
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm bg-white dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    value={filters.end_date}
+                    onChange={(e) => handleFilterChange("end_date", e.target.value)}
+                    max={new Date().toISOString().split("T")[0]}
+                    min={filters.start_date}
+                  />
+                </div>
+              </>
+            ) : null}
+
             {/* Search Input */}
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -698,33 +909,6 @@ export default function Cashflow() {
                 placeholder="Cari berdasarkan deskripsi"
                 value={filters.search}
                 onChange={(e) => handleSearchChange(e.target.value)}
-              />
-            </div>
-
-            {/* Date Range */}
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Dari Tanggal
-              </label>
-              <input
-                type="date"
-                className="w-full border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-800 px-4 py-3.5 sm:py-2.5 rounded-xl bg-white dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base sm:text-sm font-medium min-h-[44px]"
-                value={filters.start_date}
-                onChange={(e) =>
-                  handleFilterChange("start_date", e.target.value)
-                }
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Sampai Tanggal
-              </label>
-              <input
-                type="date"
-                className="w-full border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-800 px-4 py-3.5 sm:py-2.5 rounded-xl bg-white dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base sm:text-sm font-medium min-h-[44px]"
-                value={filters.end_date}
-                onChange={(e) => handleFilterChange("end_date", e.target.value)}
               />
             </div>
 
@@ -982,16 +1166,32 @@ export default function Cashflow() {
                         }))
                       }
                       placeholder="Pilih jumlah"
-                      options={[5, 10, 20, 50, 100].map((size) => ({
-                        value: size.toString(),
-                        label: `${size} baris`,
-                      }))}
+                      options={[
+                        { value: "10", label: "10 baris" },
+                        { value: "25", label: "25 baris" },
+                        { value: "50", label: "50 baris" },
+                        { value: "100", label: "100 baris" },
+                      ]}
+                      themeColor="emerald"
                       className="w-auto min-w-[100px] sm:min-w-[120px]"
                     />
                   </div>
                   <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
-                    Menampilkan {transactions.length} dari {pagination.total}{" "}
-                    data
+                    Menampilkan{" "}
+                    <span className="font-medium">
+                      {pagination.total > 0
+                        ? (pagination.current_page - 1) * pagination.per_page + 1
+                        : 0}
+                    </span>{" "}
+                    sampai{" "}
+                    <span className="font-medium">
+                      {Math.min(
+                        pagination.current_page * pagination.per_page,
+                        pagination.total
+                      )}
+                    </span>{" "}
+                    dari{" "}
+                    <span className="font-medium">{pagination.total}</span> data
                   </span>
                 </div>
 

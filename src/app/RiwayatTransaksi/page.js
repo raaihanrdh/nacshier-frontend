@@ -49,10 +49,10 @@ const LaporanTransaksi = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTransaksi, setSelectedTransaksi] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25); // Default 25 items per page
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
-  const itemsPerPage = 10;
 
   // Reset summary data
   const resetSummary = useCallback(() => {
@@ -176,14 +176,24 @@ const LaporanTransaksi = () => {
         if (periode === "harian" && date) {
           params.append("period", "daily");
           params.append("date", date);
-        } else if (periode === "mingguan" && start && end) {
+        } else if (periode === "mingguan") {
           params.append("period", "weekly");
-          params.append("start_date", start);
-          params.append("end_date", end);
-        } else if (periode === "bulanan" && start && end) {
+          if (start && end) {
+            params.append("start_date", start);
+            params.append("end_date", end);
+          }
+        } else if (periode === "bulanan") {
           params.append("period", "monthly");
+          if (start && end) {
+            params.append("start_date", start);
+            params.append("end_date", end);
+          }
+        } else if (periode === "custom" && start && end) {
+          params.append("period", "custom");
           params.append("start_date", start);
           params.append("end_date", end);
+        } else if (periode === "semua") {
+          params.append("period", "all");
         }
 
         console.log("Fetching with params:", params.toString());
@@ -195,14 +205,13 @@ const LaporanTransaksi = () => {
 
         console.log("Raw API data:", transactionsData);
 
-        // Additional client-side filtering for daily transactions
-        if (periode === "harian" && date) {
+        // Additional client-side filtering for daily transactions (backup filter)
+        if (periode === "harian" && date && transactionsData.length > 0) {
           transactionsData = transactionsData.filter((trx) => {
             const trxDate = normalizeDate(
               trx.transaction_time || trx.tanggal || ""
             );
             const filterDate = normalizeDate(date);
-            console.log("Comparing:", trxDate, "with", filterDate);
             return trxDate === filterDate;
           });
         }
@@ -274,38 +283,53 @@ const LaporanTransaksi = () => {
 
   // Fetch data when period or dates change
   useEffect(() => {
-    if (periode === "harian" && tanggal) {
+    if (periode === "semua") {
+      console.log("Fetching all transactions");
+      fetchTransaksi("", "", "");
+    } else if (periode === "harian" && tanggal) {
       console.log("Fetching daily transactions for:", tanggal);
       fetchTransaksi(tanggal, "", "");
-    } else if (
-      (periode === "mingguan" || periode === "bulanan") &&
-      startDate &&
-      endDate
-    ) {
-      console.log("Fetching period transactions:", startDate, "to", endDate);
+    } else if (periode === "mingguan") {
+      console.log("Fetching weekly transactions:", startDate, "to", endDate);
+      fetchTransaksi("", startDate, endDate);
+    } else if (periode === "bulanan") {
+      console.log("Fetching monthly transactions:", startDate, "to", endDate);
+      fetchTransaksi("", startDate, endDate);
+    } else if (periode === "custom" && startDate && endDate) {
+      console.log("Fetching custom range transactions:", startDate, "to", endDate);
       fetchTransaksi("", startDate, endDate);
     }
   }, [periode, tanggal, startDate, endDate, fetchTransaksi]);
 
-  // Set default dates for weekly and monthly periods
+  // Set default dates for weekly, monthly, and custom periods
   useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    
     if (periode === "mingguan") {
-      const today = new Date();
-      const firstDayOfWeek = new Date(today);
-      firstDayOfWeek.setDate(today.getDate() - today.getDay());
+      const todayDate = new Date();
+      const firstDayOfWeek = new Date(todayDate);
+      firstDayOfWeek.setDate(todayDate.getDate() - todayDate.getDay());
 
       setStartDate(firstDayOfWeek.toISOString().split("T")[0]);
-      setEndDate(today.toISOString().split("T")[0]);
+      setEndDate(today);
     } else if (periode === "bulanan") {
-      const today = new Date();
+      const todayDate = new Date();
       const firstDayOfMonth = new Date(
-        today.getFullYear(),
-        today.getMonth(),
+        todayDate.getFullYear(),
+        todayDate.getMonth(),
         1
       );
 
       setStartDate(firstDayOfMonth.toISOString().split("T")[0]);
-      setEndDate(today.toISOString().split("T")[0]);
+      setEndDate(today);
+    } else if (periode === "custom") {
+      // Set default custom range to last 30 days
+      const todayDate = new Date();
+      const thirtyDaysAgo = new Date(todayDate);
+      thirtyDaysAgo.setDate(todayDate.getDate() - 30);
+
+      setStartDate(thirtyDaysAgo.toISOString().split("T")[0]);
+      setEndDate(today);
     }
   }, [periode]);
 
@@ -424,19 +448,26 @@ const LaporanTransaksi = () => {
 
       // Prepare request parameters
       const params = new URLSearchParams();
-      params.append(
-        "period",
-        periode === "harian"
-          ? "daily"
-          : periode === "mingguan"
-          ? "weekly"
-          : "monthly"
-      );
+      
+      // Set period parameter
+      if (periode === "harian") {
+        params.append("period", "daily");
+      } else if (periode === "mingguan") {
+        params.append("period", "weekly");
+      } else if (periode === "bulanan") {
+        params.append("period", "monthly");
+      } else if (periode === "custom") {
+        params.append("period", "custom");
+      } else if (periode === "semua") {
+        params.append("period", "all");
+      } else {
+        params.append("period", "daily"); // Default fallback
+      }
 
       if (periode === "harian" && tanggal) {
         params.append("date", tanggal);
       } else if (
-        (periode === "mingguan" || periode === "bulanan") &&
+        (periode === "mingguan" || periode === "bulanan" || periode === "custom") &&
         startDate &&
         endDate
       ) {
@@ -524,19 +555,26 @@ const LaporanTransaksi = () => {
 
       // Prepare request parameters
       const params = new URLSearchParams();
-      params.append(
-        "period",
-        periode === "harian"
-          ? "daily"
-          : periode === "mingguan"
-          ? "weekly"
-          : "monthly"
-      );
+      
+      // Set period parameter
+      if (periode === "harian") {
+        params.append("period", "daily");
+      } else if (periode === "mingguan") {
+        params.append("period", "weekly");
+      } else if (periode === "bulanan") {
+        params.append("period", "monthly");
+      } else if (periode === "custom") {
+        params.append("period", "custom");
+      } else if (periode === "semua") {
+        params.append("period", "all");
+      } else {
+        params.append("period", "daily"); // Default fallback
+      }
 
       if (periode === "harian" && tanggal) {
         params.append("date", tanggal);
       } else if (
-        (periode === "mingguan" || periode === "bulanan") &&
+        (periode === "mingguan" || periode === "bulanan" || periode === "custom") &&
         startDate &&
         endDate
       ) {
@@ -730,13 +768,14 @@ const LaporanTransaksi = () => {
               </button>
               <button
                 onClick={() => {
+                  const today = new Date().toISOString().split("T")[0];
                   setPeriode("harian");
-                  setTanggal("");
-                  setStartDate("");
-                  setEndDate("");
+                  setTanggal(today);
+                  setStartDate(today);
+                  setEndDate(today);
                   setProduk("");
                   setKasir("");
-                  handleFilter();
+                  setCurrentPage(1);
                 }}
                 className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors active:scale-95 min-h-[40px] sm:min-h-[36px]"
               >
@@ -749,17 +788,19 @@ const LaporanTransaksi = () => {
             <Dropdown
               label="Periode"
               value={periode}
-              onChange={(e) => setPeriode(e.target.value)}
+              onChange={(e) => handlePeriodeChange(e.target.value)}
               placeholder="Pilih periode"
               themeColor="blue"
               options={[
+                { value: "semua", label: "Semua" },
                 { value: "harian", label: "Harian" },
                 { value: "mingguan", label: "Mingguan" },
                 { value: "bulanan", label: "Bulanan" },
+                { value: "custom", label: "Custom (Rentang Tanggal)" },
               ]}
             />
 
-            {periode === "harian" ? (
+            {periode === "semua" ? null : periode === "harian" ? (
               <div className="flex flex-col">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Tanggal
@@ -767,12 +808,12 @@ const LaporanTransaksi = () => {
                 <input
                   type="date"
                   value={tanggal}
-                  onChange={(e) => setTanggal(e.target.value)}
+                  onChange={(e) => handleTanggalChange(e.target.value)}
                   className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm bg-white dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   max={new Date().toISOString().split("T")[0]}
                 />
               </div>
-            ) : (
+            ) : (periode === "mingguan" || periode === "bulanan" || periode === "custom") ? (
               <>
                 <div className="flex flex-col">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -796,10 +837,11 @@ const LaporanTransaksi = () => {
                     onChange={(e) => setEndDate(e.target.value)}
                     className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm bg-white dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     max={new Date().toISOString().split("T")[0]}
+                    min={startDate}
                   />
                 </div>
               </>
-            )}
+            ) : null}
 
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -1104,51 +1146,78 @@ const LaporanTransaksi = () => {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6 bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex-1 flex justify-between sm:hidden">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md ${
-                      currentPage === 1
-                        ? "border-gray-300 text-gray-500 cursor-not-allowed"
-                        : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                    }`}
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`ml-3 relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md ${
-                      currentPage === totalPages
-                        ? "border-gray-300 text-gray-500 cursor-not-allowed"
-                        : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                    }`}
-                  >
-                    Next
-                  </button>
+            {totalPages > 1 || filteredTransaksi.length > 0 ? (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 bg-white dark:bg-gray-800 px-4 sm:px-6 py-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                {/* Items Per Page Selector */}
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <label className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                    Baris per halaman:
+                  </label>
+                  <Dropdown
+                    value={itemsPerPage.toString()}
+                    onChange={(e) => {
+                      setItemsPerPage(parseInt(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    placeholder="Pilih"
+                    themeColor="blue"
+                    options={[
+                      { value: "10", label: "10 baris" },
+                      { value: "25", label: "25 baris" },
+                      { value: "50", label: "50 baris" },
+                      { value: "100", label: "100 baris" },
+                    ]}
+                  />
                 </div>
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+
+                {/* Mobile Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex-1 flex justify-between sm:hidden w-full">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md ${
+                        currentPage === 1
+                          ? "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                          : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`ml-3 relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md ${
+                        currentPage === totalPages
+                          ? "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                          : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+
+                {/* Desktop Pagination */}
+                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between gap-4">
                   <div>
-                    <p className="text-sm text-gray-700">
-                      Showing{" "}
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Menampilkan{" "}
                       <span className="font-medium">
-                        {indexOfFirstTransaction + 1}
+                        {filteredTransaksi.length > 0 ? indexOfFirstTransaction + 1 : 0}
                       </span>{" "}
-                      to{" "}
+                      sampai{" "}
                       <span className="font-medium">
                         {Math.min(
                           indexOfLastTransaction,
                           filteredTransaksi.length
                         )}
                       </span>{" "}
-                      of{" "}
+                      dari{" "}
                       <span className="font-medium">
                         {filteredTransaksi.length}
                       </span>{" "}
-                      results
+                      data
                     </p>
                   </div>
                   <div>
@@ -1223,7 +1292,7 @@ const LaporanTransaksi = () => {
                   </div>
                 </div>
               </div>
-            )}
+            ) : null}
           </>
         )}
 
